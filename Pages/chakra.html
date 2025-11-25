@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chakra Meditation Journey</title>
+  <meta name="description" content="Interactive chakra meditation visualization" />
+  <style>
+    /* Base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background: url(../img/space.png);
+      position: relative;
+      color: #4b6455;
+    }
+
+    .app-container {
+      position: relative;
+      min-height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    /* Background patterns and elements */
+    .app-container::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url('chakra-pattern.svg');
+      background-repeat: repeat;
+      opacity: 0.1;
+      z-index: -1;
+    }
+
+    .app-container::after {
+      content: '';
+      position: absolute;
+      width: 80vh;
+      height: 80vh;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ffffff 0%, #3f3f5e 100%);
+      opacity: 0.3;
+      z-index: -1;
+    }
+
+    /* Header styles */
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+      opacity: 0;
+      transform: translateY(-20px);
+      animation: fadeIn 1s ease-out forwards 0.5s;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      color: #a5ceca;
+      margin-bottom: 0.5rem;
+    }
+
+    .header p {
+      font-size: 1.125rem;
+      color: #b9d0c6;
+    }
+
+    /* Main content layout */
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 1200px;
+      gap: 2rem;
+      z-index: 1;
+    }
+
+    @media (min-width: 768px) {
+      .main-content {
+        flex-direction: row;
+      }
+    }
+
+    /* Chakra body container */
+    .chakra {
+      background-image: url('flower.png');
+      background-size: cover;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      position: absolute;
+      animation: bump 2s infinite ease-in-out;
+    }
+
+    .chakra-body-container {
+      position: relative;
+      opacity: 0;
+      transform: scale(0.95);
+      animation: scaleIn 1s ease-out forwards 0.8s;
+    }
+
+    .body-silhouette {
+      position: relative;
+      width: 300px;
+      height: 500px;
+    }
+
+    @media (min-width: 768px) {
+      .body-silhouette {
+        width: 400px;
+        height: 600px;
+      }
+    }
+
+    .body-silhouette img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+    }
+
+    /* Chakra point styles */
+    .chakra-point {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .chakra-icon {
+      background-image: url('../img/flower.png');
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    @media (min-width: 768px) {
+      .chakra-icon {
+        width: 30px;
+        height: 30px;
+      }
+    }
+
+    .chakra-point:hover .chakra-icon,
+    .chakra-point.active .chakra-icon {
+      transform: scale(1.2);
+    }
+
+    /* Pulse animation for chakra points */
+    .pulse {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .chakra-point:hover .pulse,
+    .chakra-point.active .pulse {
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+
+    /* Chakra details panel */
+    .chakra-details-container {
+      width: 100%;
+      max-width: 400px;
+      opacity: 0;
+      animation: fadeIn 1s ease-out forwards 1s;
+    }
+
+    .chakra-details {
+      backdrop-filter: blur(10px);
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .initial-message {
+      margin: auto;
+      color: #ddf6f4;
+      font-size: 1.125rem;
+      text-align: center;
+    }
+
+    .chakra-details-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .chakra-mini-icon {
+      width: 1rem;
+      height: 1rem;
+      border-radius: 50%;
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .chakra-name {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .chakra-sanskrit {
+      font-size: 1.125rem;
+      margin-bottom: 0.75rem;
+      color: #cadcdb;
+    }
+
+    .chakra-description {
+      color: #bdd7d5;
+      margin-bottom: 1rem;
+    }
+
+    .chakra-element,
+    .chakra-location {
+      font-weight: 500;
+      color: #b5cfcd;
+      margin-bottom: 0.30rem;
+    }
+
+    /* Footer */
+    footer {
+      position: absolute;
+      bottom: 1rem;
+      width: 100%;
+      text-align: center;
+      color: #b0ced9;
+      opacity: 0;
+      animation: fadeIn 1s ease-out forwards 1.2s;
+    }
+
+    /* Audio controls */
+    .audio-controls {
+      position: fixed;
+      height: 3rem;
+      bottom: 1rem;
+      right: 1rem;
+      z-index: 20;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .audio-controls button {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      background-color: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 0.375rem;
+      color: #f2fdfc;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: background-color 0.5s;
+    }
+
+    .audio-controls button:hover {
+      background-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .audio-controls .icon {
+      margin-right: 0.2rem;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 0.7;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0;
+        transform: scale(2);
+      }
+
+      100% {
+        opacity: 0;
+        transform: scale(1);
+      }
+    }
+
+    /* Animation for details panel */
+    .chakra-details.animate-from-left {
+      animation: slideFromLeft 0.5s ease-out forwards;
+    }
+
+    .chakra-details.animate-from-right {
+      animation: slideFromRight 0.5s ease-out forwards;
+    }
+
+    @keyframes slideFromLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-50px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideFromRight {
+      from {
+        opacity: 0;
+        transform: translateX(50px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div style="position: fixed; top: 10px; left: 10px; z-index: 100;">
+    <a href="../index.html" style="text-decoration: none; color: none;">
+      <img src="../img/earthhq.gif" alt="Earth"
+        style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; filter: brightness(1.2) contrast(1.1); mix-blend-mode: screen;">
+      <div
+        style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: rgb(255, 255, 255); font-weight: bold; text-align: center; pointer-events: none; opacity: 0.8; font-size: 14px;">
+        Home
+      </div>
+    </a>
+  </div>
+  <div class="app-container">
+    <header class="header">
+      <h1>Chakra Meditation Journey</h1>
+      <p>Hover over each chakra to discover its meaning and purpose</p>
+    </header>
+
+    <div class="main-content">
+      <div class="chakra-body-container">
+        <div class="body-silhouette">
+          <img src="../img/chakra.png" alt="Human sitting meditation pose silhouette" draggable="false">
+          <div id="chakra-points"></div>
+        </div>
+      </div>
+
+      <div class="chakra-details-container">
+        <div id="chakra-details" class="chakra-details">
+
+        </div>
+      </div>
+    </div>
+
+
+    <footer>
+      <p>• Breathe deeply • Find your balance •</p>
+
+    </footer>
+
+  </div>
+
+  <div class="app-container">
+    <header class="header">
+      <h1></h1>
+      <p></p>
+    </header>
+
+    <div class="main-content">
+      <div class="chakra-body-container">
+        <div class="body-silhouette">
+          <img src="../img/mindmap.png" alt="Human sitting meditation pose silhouette"
+            style="width: 850px; height: 550px;  margin-left: -220px;">
+          <div id="chakra-points"></div>
+        </div>
+      </div>
+    </div>
+
+
+    <footer>
+      <p>• Breathe deeply • Find your balance •</p>
+    </footer>
+
+    <div class="audio-controls">
+      <button id="toggle-audio">
+        <span class="icon">🔊</span>
+        <span id="audio-text">Play Music</span>
+      </button>
+
+    </div>
+  </div>
+
+  <audio id="meditation-music" src="../audio/m1.mp3" loop></audio>
+
+  <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+  <script>// Chakra data
+    const chakraData = [
+      {
+        id: "chakra7",
+        name: "Crown Chakra",
+        sanskritName: "Sahasrara",
+        description: "The Crown Chakra represents our connection to higher consciousness and spiritual awareness. It governs our thoughts, wisdom, and understanding of our place in the universe.",
+        color: "#FB923C",
+        location: "Top of the head",
+        element: "Thought",
+        iconUrl: "../img/flower.png",
+        positionTop: "6%",
+        positionLeft: "50.8%",
+      },
+      {
+        id: "chakra6",
+        name: "Third Eye Chakra",
+        sanskritName: "Ajna",
+        description: "The Third Eye Chakra is associated with intuition, imagination, and the ability to see beyond the physical world. It helps us trust our inner wisdom and insights.",
+        color: "#FB923C",
+        location: "Center of the forehead",
+        element: "Light",
+        iconUrl: "../img/flower.png",
+        positionTop: "18%",
+        positionLeft: "50.8%",
+      },
+      {
+        id: "chakra5",
+        name: "Throat Chakra",
+        sanskritName: "Vishuddha",
+        description: "The Throat Chakra governs communication, self-expression, and the ability to speak our truth. It helps us communicate clearly and listen to others with compassion.",
+        color: "#FB923C",
+        location: "Throat",
+        element: "Ether",
+        iconUrl: "../img/flower.png",
+        positionTop: "35%",
+        positionLeft: "50.8%",
+      },
+      {
+        id: "chakra4",
+        name: "Heart Chakra",
+        sanskritName: "Anahata",
+        description: "The Heart Chakra is the center of love, compassion, and acceptance. It bridges the lower chakras of matter and the upper chakras of spirit, integrating mind, body, and soul.",
+        color: "#FB923C",
+        location: "Center of chest",
+        element: "Air",
+        iconUrl: "../img/flower.png",
+        positionTop: "50%",
+        positionLeft: "50.8%",
+      },
+      {
+        id: "chakra3",
+        name: "Solar Plexus Chakra",
+        sanskritName: "Manipura",
+        description: "The Solar Plexus Chakra governs personal power, confidence, and self-esteem. It helps us assert ourselves in the world and maintain healthy boundaries.",
+        color: "#FB923C",
+        location: "Upper abdomen",
+        element: "Fire",
+        iconUrl: "../img/flower.png",
+        positionTop: "62%",
+        positionLeft: "50.8%",
+      },
+      {
+        id: "chakra2",
+        name: "Sacral Chakra",
+        sanskritName: "Svadhisthana",
+        description: "The Sacral Chakra is associated with creativity, passion, and emotional balance. It governs our relationships, pleasure, and our ability to embrace change.",
+        color: "#FB923C",
+        location: "Lower abdomen",
+        element: "Water",
+        iconUrl: "../img/flower.png",
+        positionTop: "70%",
+        positionLeft: "50.8%",
+      },
+      {
+        id: "chakra1",
+        name: "Root Chakra",
+        sanskritName: "Muladhara",
+        description: "The Root Chakra is the foundation of our energy system, governing our sense of security, stability, and basic needs. It connects us to the earth and helps us feel grounded.",
+        color: "#FB923C",
+        location: "Base of spine",
+        element: "Earth",
+        iconUrl: "../img/flower.png",
+        positionTop: "79%",
+        positionLeft: "50.8%",
+      },
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Create chakra points
+      const chakraPointsContainer = document.getElementById('chakra-points');
+      const chakraDetailsContainer = document.getElementById('chakra-details');
+      let activeChakraId = null;
+
+      // Create chakra points on the body
+      chakraData.forEach(chakra => {
+        const chakraPoint = document.createElement('div');
+        chakraPoint.classList.add('chakra-point');
+        chakraPoint.id = chakra.id;
+        chakraPoint.style.top = chakra.positionTop;
+        chakraPoint.style.left = chakra.positionLeft;
+
+        // Create chakra icon
+        const chakraIcon = document.createElement('div');
+        chakraIcon.classList.add('chakra-icon');
+        chakraIcon.style.backgroundImage = `url(${chakra.iconUrl})`;
+        chakraIcon.style.filter = `drop-shadow(0 0 4px ${chakra.color})`;
+
+        // Create pulse effect
+        const pulse = document.createElement('div');
+        pulse.classList.add('pulse');
+        pulse.style.backgroundColor = chakra.color;
+
+        // Add elements to the point
+        chakraPoint.appendChild(chakraIcon);
+        chakraPoint.appendChild(pulse);
+
+        // Add event listeners
+        chakraPoint.addEventListener('mouseenter', () => {
+          setActiveChakra(chakra.id);
+        });
+
+        chakraPoint.addEventListener('focus', () => {
+          setActiveChakra(chakra.id);
+        });
+
+        // Add to container
+        chakraPointsContainer.appendChild(chakraPoint);
+      });
+
+      // Function to set active chakra
+      function setActiveChakra(chakraId) {
+        // Remove active class from previous chakra
+        if (activeChakraId) {
+          document.getElementById(activeChakraId).classList.remove('active');
+        }
+
+        // Set new active chakra
+        activeChakraId = chakraId;
+        const chakraPoint = document.getElementById(chakraId);
+        chakraPoint.classList.add('active');
+
+        // Get chakra data
+        const chakra = chakraData.find(c => c.id === chakraId);
+
+        // Clear previous details
+        chakraDetailsContainer.innerHTML = '';
+
+        // Create new details
+        const chakraNumber = parseInt(chakraId.replace('chakra', ''));
+        const animationClass = chakraNumber % 2 === 0 ? 'animate-from-left' : 'animate-from-right';
+        chakraDetailsContainer.classList.add(animationClass);
+
+        // Chakra header
+        const header = document.createElement('div');
+        header.classList.add('chakra-details-header');
+
+        const miniIcon = document.createElement('div');
+        miniIcon.classList.add('chakra-mini-icon');
+        miniIcon.style.backgroundImage = `url(${chakra.iconUrl})`;
+
+        const name = document.createElement('h2');
+        name.classList.add('chakra-name');
+        name.textContent = chakra.name;
+        name.style.color = chakra.color;
+
+        header.appendChild(miniIcon);
+        header.appendChild(name);
+
+        // Sanskrit name
+        const sanskrit = document.createElement('p');
+        sanskrit.classList.add('chakra-sanskrit');
+        sanskrit.textContent = chakra.sanskritName;
+
+        // Description
+        const description = document.createElement('p');
+        description.classList.add('chakra-description');
+        description.textContent = chakra.description;
+
+        // Element and location
+        const element = document.createElement('p');
+        element.classList.add('chakra-element');
+        element.textContent = `Element: ${chakra.element}`;
+
+        const location = document.createElement('p');
+        location.classList.add('chakra-location');
+        location.textContent = `Location: ${chakra.location}`;
+
+        // Add all elements to details container
+        chakraDetailsContainer.appendChild(header);
+        chakraDetailsContainer.appendChild(sanskrit);
+        chakraDetailsContainer.appendChild(description);
+        chakraDetailsContainer.appendChild(element);
+        chakraDetailsContainer.appendChild(location);
+
+        // Remove animation class after animation completes
+        setTimeout(() => {
+          chakraDetailsContainer.classList.remove(animationClass);
+        }, 500);
+      }
+
+      // Audio player functionality
+      const audioElement = document.getElementById('meditation-music');
+      const toggleAudioButton = document.getElementById('toggle-audio');
+      const audioText = document.getElementById('audio-text');
+      let isPlaying = false;
+
+      // Autoplay music when page loads
+      audioElement.play().then(() => {
+        isPlaying = true;
+        audioText.textContent = 'Pause Music';
+        toggleAudioButton.querySelector('.icon').textContent = '🔈';
+      }).catch(error => {
+        console.log('Autoplay prevented:', error);
+        // Autoplay was prevented by browser, keep default state
+      });
+
+      toggleAudioButton.addEventListener('click', () => {
+        if (isPlaying) {
+          audioElement.pause();
+          audioText.textContent = 'Play Music';
+          toggleAudioButton.querySelector('.icon').textContent = '🔊';
+        } else {
+          audioElement.play();
+          audioText.textContent = 'Pause Music';
+          toggleAudioButton.querySelector('.icon').textContent = '🔈';
+        }
+        isPlaying = !isPlaying;
+      });
+    });
+  </script>
+</body>
+
+</html>
